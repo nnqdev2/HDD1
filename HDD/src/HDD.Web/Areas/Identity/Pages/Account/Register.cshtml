@@ -76,36 +76,6 @@
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
         </form>
     </div>
-@*    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr />
-            @{
-                if ((Model.ExternalLogins?.Count ?? 0) == 0)
-                {
-                    <div>
-                        <p>
-                            There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkID=532715">article
-                            about setting up this ASP.NET application to support logging in via external services</a>.
-                        </p>
-                    </div>
-                }
-                else
-                {
-                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                        <div>
-                            <p>
-                                @foreach (var provider in Model.ExternalLogins)
-                                {
-                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
-                                }
-                            </p>
-                        </div>
-                    </form>
-                }
-            }
-        </section>
-    </div>*@
 </div>
 
 @*@section Scripts {
@@ -146,41 +116,41 @@
                 });
             });
 
-            $("#registerSubmit").click(function () {
-                //alert("Input_VIN before ajax: " + $("#Input_VIN").val()
-                //+ "Input_Plate before ajax: " + $("#Input_Plate").val()
-                //+ "Input_RegisteredZip before ajax: " + $("#Input_RegisteredZip").val()
-                //);
-                $.ajax({
-                    type: "POST",
-                    //url: window.location.pathname +"/Identity/Account/Register?handler=CheckVINPlateRegisteredZip",
-                    //url: '@Url.Page("/Identity/Account/Register?handler=CheckVINPlateRegisteredZip")',
-                    url: window.location.pathname +"?handler=CheckVINPlateRegisteredZip",
-                    dataType: "json",
-                    beforeSend: function (xhr) {
-                        xhr.setRequestHeader("XSRF-TOKEN",
-                            $('input:hidden[name="__RequestVerificationToken"]').val());
-                    },
-                    data: { "vin": $("#Input_VIN").val() ,
-                            "plate": $("#Input_Plate").val() ,
-                            "registeredZip": $("#Input_RegisteredZip").val()
-                    },
-                    success: function (response) {
-                        //alert("Success: " + response);
-                        if (response == true) {
-                            $("#hidden-panel").hide()
-                        } else {
-                            $("#hidden-panel").show()
-                        }
-                    },
-                    failure: function (response) {
-                        alert("Failure: " +response);
-                    },
-                    error: function (response) {
-                        alert("Error: " +response);
-                    }
-                });
-            });
+            //$("#registerSubmit").click(function () {
+            //    //alert("Input_VIN before ajax: " + $("#Input_VIN").val()
+            //    //+ "Input_Plate before ajax: " + $("#Input_Plate").val()
+            //    //+ "Input_RegisteredZip before ajax: " + $("#Input_RegisteredZip").val()
+            //    //);
+            //    $.ajax({
+            //        type: "POST",
+            //        //url: window.location.pathname +"/Identity/Account/Register?handler=CheckVINPlateRegisteredZip",
+            //        //url: '@Url.Page("/Identity/Account/Register?handler=CheckVINPlateRegisteredZip")',
+            //        url: window.location.pathname +"?handler=CheckVINPlateRegisteredZip",
+            //        dataType: "json",
+            //        beforeSend: function (xhr) {
+            //            xhr.setRequestHeader("XSRF-TOKEN",
+            //                $('input:hidden[name="__RequestVerificationToken"]').val());
+            //        },
+            //        data: { "vin": $("#Input_VIN").val() ,
+            //                "plate": $("#Input_Plate").val() ,
+            //                "registeredZip": $("#Input_RegisteredZip").val()
+            //        },
+            //        success: function (response) {
+            //            //alert("Success: " + response);
+            //            if (response == true) {
+            //                $("#hidden-panel").hide()
+            //            } else {
+            //                $("#hidden-panel").show()
+            //            }
+            //        },
+            //        failure: function (response) {
+            //            alert("Failure: " +response);
+            //        },
+            //        error: function (response) {
+            //            alert("Error: " +response);
+            //        }
+            //    });
+            //});
         });
     </script>
 }

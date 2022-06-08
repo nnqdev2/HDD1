@@ -73,7 +73,7 @@ namespace HDD.Web.Services
         {
             var emailIdParam = (new SqlParameter("@EmailId", secondaryOwner.UserName));
             var userIdParam = (new SqlParameter("@UserId", secondaryOwner.Id));
-            var exeSp = "execute dbo.apAssignVinsToSecondaryOwner  @emailIdParam, @userIdParam";
+            var exeSp = "execute dbo.apAssignVinsToSecondaryOwner  @EmailId, @UserId";
             var result = await _context.Database.ExecuteSqlRawAsync(exeSp, emailIdParam, userIdParam);
         }
         public async Task UpdateVehicle(ApplicationViewModel avm)

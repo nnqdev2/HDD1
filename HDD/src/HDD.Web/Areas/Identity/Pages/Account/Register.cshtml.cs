@@ -153,7 +153,7 @@ namespace HDD.Web.Areas.Identity.Pages.Account
             //string result = vin + plate + registeredZip;
             //return new JsonResult(result);
             var result = await _vinOwnershipService.IsIncomingPrimaryOwner(Input.VIN, Input.Plate, Input.RegisteredZip);
-            if (!result)
+            if (result)
             {
                 ModelState.AddModelError("Input.VIN", "Invalid VIN, Plate, Registered Zip combination");
                 ModelState.AddModelError("Input.Plate", "Invalid VIN, Plate, Registered Zip combination");
@@ -188,8 +188,6 @@ namespace HDD.Web.Areas.Identity.Pages.Account
                 user.VIN = Input.VIN;
                 user.Plate = Input.Plate;
                 user.RegisteredZip = Input.RegisteredZip;
-
-
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 var result = await _userManager.CreateAsync(user, Input.Password);
