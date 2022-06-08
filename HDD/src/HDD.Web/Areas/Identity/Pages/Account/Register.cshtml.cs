@@ -140,7 +140,7 @@ namespace HDD.Web.Areas.Identity.Pages.Account
         public async Task OnGetAsync(string returnUrl = null)
         {
             ReturnUrl = returnUrl;
-            //ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 
         public async Task<JsonResult> OnPostCheckEmail(string email)
@@ -199,7 +199,7 @@ namespace HDD.Web.Areas.Identity.Pages.Account
                     _logger.LogInformation("User created a new account with password.");
 
                     var userId = await _userManager.GetUserIdAsync(user);
-                    await _vinOwnershipService.AssignOwnershipToVin(userId, Input.VIN, true);
+                    //await _vinOwnershipService.AssignOwnershipToVin(userId, Input.VIN, true);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                     var callbackUrl = Url.Page(

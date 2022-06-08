@@ -21,11 +21,13 @@ namespace HDD.Web.Areas.Identity.Pages.Account
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IHDDRepository _hddDataService;
-        public ConfirmEmailModel(UserManager<ApplicationUser> userManager,
+        private readonly IVinOwnershipService _vinOwnershipService;
+        public ConfirmEmailModel(UserManager<ApplicationUser> userManager, IVinOwnershipService vinOwnershipService,
             IHDDRepository hddDataService)
         {
             _userManager = userManager;
             _hddDataService = hddDataService;
+            _vinOwnershipService = vinOwnershipService;
         }
 
         /// <summary>
@@ -51,14 +53,14 @@ namespace HDD.Web.Areas.Identity.Pages.Account
             var result = await _userManager.ConfirmEmailAsync(user, code);
             if (result.Succeeded && !isConfirmedPreviously)
             {
-                var ownersVin = new OwnersVin();
-                ownersVin.OwnerId = user.Id;
-                ownersVin.Vin = user.VIN;
-                ownersVin.UpdateDateTime = DateTime.Now;
-                ownersVin.PrimaryOwner = user.VIN is not null ? "Y" : "N";
-                ownersVin.OwnerStatus = true;
-                ownersVin.UpdateDateTime = DateTime.Now;
-                await _hddDataService.InsertOwnersVin(ownersVin);
+                if (!String.IsNullOrEmpty(user.VIN))
+                {
+                    await _vinOwnershipService.AssignVinToPrimaryOwner(user);
+                }
+                else
+                {
+                    await _vinOwnershipService.AssignVinsToSecondaryOwner(user);
+                }
             }
 
             StatusMessage = result.Succeeded ? "Thank you for confirming your email." : "Error confirming your email.";

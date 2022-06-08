@@ -4,6 +4,8 @@ using HDD.Web.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using HDD.Web.ViewModels;
+using System.Data;
+using HDD.Infrastructure.Identity;
 
 namespace HDD.Web.Services
 {
@@ -55,6 +57,25 @@ namespace HDD.Web.Services
 
             return efound > 0;
         }
+
+        public async Task InsertOwnersVin(OwnersVin ownersVin)
+        {
+            await _context.AddAsync(ownersVin);
+            await _context.SaveChangesAsync();
+        }
+        public async Task<IList<SecondaryOwnerAssignment>> GetSecondaryOwnerAssignments(string incomingSecondaryOwnerEmail)
+        {
+            var results = await _context.SecondaryOwnerAssignments.Where(a => a.IncomingSecondaryOwnerEmail == incomingSecondaryOwnerEmail).ToListAsync();
+            return results;
+        }
+
+        public async Task AssignVinsToSecondaryOwner(ApplicationUser secondaryOwner)
+        {
+            var emailIdParam = (new SqlParameter("@EmailId", secondaryOwner.UserName));
+            var userIdParam = (new SqlParameter("@UserId", secondaryOwner.Id));
+            var exeSp = "execute dbo.apAssignVinsToSecondaryOwner  @emailIdParam, @userIdParam";
+            var result = await _context.Database.ExecuteSqlRawAsync(exeSp, emailIdParam, userIdParam);
+        }
         public async Task UpdateVehicle(ApplicationViewModel avm)
         {
             var vehicle = new RetrofitApplication();
@@ -78,11 +99,7 @@ namespace HDD.Web.Services
 
 
 
-        public async Task InsertOwnersVin(OwnersVin ownersVin)
-        {
-            await _context.AddAsync(ownersVin);
-            await _context.SaveChangesAsync();
-        }
+
 
         public  IEnumerable<OwnersVin> GetVins(string ownerId)
         {
@@ -247,6 +264,10 @@ namespace HDD.Web.Services
         {
             throw new NotImplementedException();
         }
+
+
+
+
         //IEnumerable<EmailCode> IHDDRepository.GetEmailCode(int vehicleId, string email)
         //{
         //    throw new NotImplementedException();

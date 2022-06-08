@@ -12,32 +12,32 @@ namespace HDD.Web.Services
         private IEmailService _emailService;
         private ILogger<VinService> _logger;
         private readonly EmailOptions _options;
-        private readonly IHDDRepository _dataService;
+        private readonly IHDDRepository _hddRepository;
         public VinService(ILogger<VinService> logger, IEmailService emailService, IOptions<EmailOptions> options
-            , IHDDRepository dataService)
+            , IHDDRepository hddRepository)
         {
             _logger = logger;
             _emailService = emailService;
             _options = options.Value;
-            _dataService = dataService;
+            _hddRepository = hddRepository;
         }
         public async Task<bool> IsVinRegulated(string vin)
         {
-            return await _dataService.IsVinRegulated(vin);
+            return await _hddRepository.IsVinRegulated(vin);
         }
         public async Task<bool> IsPlateRegulated(string plate)
         {
-            return await _dataService.IsPlateRegulated(plate);
+            return await _hddRepository.IsPlateRegulated(plate);
         }
         public async Task<bool> IsPlateEligibleToClaim(string plate)
         {
-            var vin = await _dataService.GetVin(plate);
+            var vin = await _hddRepository.GetVin(plate);
             return await IsVinEligibleToClaim(vin);
         }
 
         public async Task<bool> IsVinEligibleToClaim(string vin)
         {
-            if (await _dataService.IsVinRegulated(vin) && !await _dataService.IsVinClaimed(vin))
+            if (await _hddRepository.IsVinRegulated(vin) && !await _hddRepository.IsVinClaimed(vin))
                 return true;
             return false;
         }
@@ -50,11 +50,11 @@ namespace HDD.Web.Services
             ownersVin.PrimaryOwner = primaryOwner;
             ownersVin.OwnerStatus = true;
             ownersVin.UpdateDateTime = DateTime.Now;
-            await _dataService.InsertOwnersVin(ownersVin);
+            await _hddRepository.InsertOwnersVin(ownersVin);
         }
         public RetrofitApplicationDmvccddata GetRetrofitApplicationDmvccddata(string vin)
         {
-            var rad = _dataService.GetRetrofitApplicationDmvccddata(vin);
+            var rad = _hddRepository.GetRetrofitApplicationDmvccddata(vin);
             //var da =  GetDocumentsAction(vin);
             //foreach (var d in da)
             //{
@@ -65,7 +65,7 @@ namespace HDD.Web.Services
 
         public IList<DocumentAction> GetDocumentsAction(string vin)
         {
-            var vehicleDocuments = _dataService.GetVehicleDocuments(vin);
+            var vehicleDocuments = _hddRepository.GetVehicleDocuments(vin);
 
             IList<DocumentAction> documentActions = vehicleDocuments.Select(x => new DocumentAction
             {

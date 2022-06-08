@@ -1,4 +1,5 @@
 ﻿using HDD.ApplicationCore.Entities;
+using HDD.Infrastructure.Identity;
 using HDD.Web.ViewModels;
 
 namespace HDD.Web.Interfaces
@@ -12,7 +13,8 @@ namespace HDD.Web.Interfaces
         Task<bool> IsIncomingPrimaryOwner(string vin, string plate, string registeredZip);
         Task<bool> IsIncomingSecondaryOwner(string email);
         Task InsertOwnersVin(OwnersVin ownersVin);
-
+        Task<IList<SecondaryOwnerAssignment>> GetSecondaryOwnerAssignments(string incomingSecondaryOwnerEmail);
+        Task AssignVinsToSecondaryOwner (ApplicationUser secondaryOwner);
         //Vehicle GetVehicle(string vin, string plate);
         //IEnumerable<EmailCode> GetEmailCode(int vehicleId, string email);
         //Task<EmailCode> GetEmailCode(string vin, string plate, string email);

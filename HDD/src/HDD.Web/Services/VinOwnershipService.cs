@@ -15,25 +15,25 @@ namespace HDD.Web.Services
         private ILogger<VinOwnershipService> _logger;
         private readonly EmailOptions _options;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IHDDRepository _dataService;
+        private readonly IHDDRepository _hddRepository;
         public VinOwnershipService(ILogger<VinOwnershipService> logger, IEmailService emailService, IOptions<EmailOptions> options
-            , UserManager<ApplicationUser> userManager, IHDDRepository dataService)
+            , UserManager<ApplicationUser> userManager, IHDDRepository hddRepository)
         {
             _logger = logger;
             _emailService = emailService;
             _options = options.Value;
             _userManager = userManager;
-            _dataService = dataService;
+            _hddRepository = hddRepository;
         }
 
         public async Task<bool> IsIncomingPrimaryOwner(string vin, string plate, string registeredZip)
         {
-            var x = await _dataService.IsIncomingPrimaryOwner(vin, plate, registeredZip);
+            var x = await _hddRepository.IsIncomingPrimaryOwner(vin, plate, registeredZip);
             return x;
         }
         public async Task<bool> IsIncomingSecondaryOwner(string email)
         {
-            var x = await _dataService.IsIncomingSecondaryOwner(email);
+            var x = await _hddRepository.IsIncomingSecondaryOwner(email);
             return x;
         }
         public async Task AssignOwnershipToVin(string userId, string vin, bool isPrimary)
@@ -44,7 +44,29 @@ namespace HDD.Web.Services
             ownersVin.UpdateDateTime = DateTime.Now;
             ownersVin.OwnerStatus = true;
             ownersVin.PrimaryOwner = isPrimary?"yes":"no";
-            await _dataService.InsertOwnersVin(ownersVin);
+            await _hddRepository.InsertOwnersVin(ownersVin);
+        }
+
+        public async Task AssignVinsToSecondaryOwner(ApplicationUser secondaryOwner)
+        {
+            await _hddRepository.AssignVinsToSecondaryOwner(secondaryOwner);
+        }
+
+        public async Task AssignVinToPrimaryOwner(ApplicationUser primaryOwner)
+        {
+            // is vin still eligible to claim
+            var hasBeenClaimed = await _hddRepository.IsVinClaimed(primaryOwner.VIN);
+            if (!hasBeenClaimed)
+            {
+                var ownersVin = new OwnersVin();
+                ownersVin.OwnerId = primaryOwner.Id;
+                ownersVin.Vin = primaryOwner.VIN;
+                ownersVin.UpdateDateTime = DateTime.Now;
+                ownersVin.PrimaryOwner = "Y";
+                ownersVin.OwnerStatus = true;
+                ownersVin.UpdateDateTime = DateTime.Now;
+                await _hddRepository.InsertOwnersVin(ownersVin);
+            }
         }
         public void SendPermissionNotificationEmail(string requestEmail, string vin, bool isApproved)
         {
@@ -70,7 +92,7 @@ namespace HDD.Web.Services
 
         public async Task<IEnumerable<VinOwnership>> GetPrimaryOwnershipVins(string ownerId)
         {
-            var ownersVins = _dataService.GetPrimaryOwnersVins(ownerId);
+            var ownersVins = _hddRepository.GetPrimaryOwnersVins(ownerId);
             IList<VinOwnership> vinOwnerships = new List<VinOwnership>();
             foreach (OwnersVin ownerVin in ownersVins)
             {
@@ -95,8 +117,8 @@ namespace HDD.Web.Services
 
         public async Task<IList<EmailInfo>> GetSecondaryOwners(string ownerId)
         {
-            //var secondaryOwnersVins = await _dataService.GetSecondaryOwnerIds("aaf7efd0-ae13-48e9-9d72-83e713ef8100");
-            var secondaryOwnersVins = await _dataService.GetSecondaryOwnerIds(ownerId);
+            //var secondaryOwnersVins = await _hddRepository.GetSecondaryOwnerIds("aaf7efd0-ae13-48e9-9d72-83e713ef8100");
+            var secondaryOwnersVins = await _hddRepository.GetSecondaryOwnerIds(ownerId);
             //var secondaryOwnerIds = secondaryOwnersVins.GroupBy(o => o.OwnerId).Select(s => s.First());
             var distinctSecondaryOwnersVins = secondaryOwnersVins.GroupBy(o => new { o.OwnerId }).Select(g => g.First());
             IList<EmailInfo> emailInfos = new List<EmailInfo>();
@@ -118,7 +140,7 @@ namespace HDD.Web.Services
 
         public async Task<IList<VinSecondaryOwnerAction>> GetVinsForSecondaryOwnershipAssignment(string ownerId, string secondaryOwnerId)
         {
-            var VinsForSecondaryOwnerAssignment = await _dataService.GetVinsForSecondaryOwnershipAssignment(ownerId, secondaryOwnerId);
+            var VinsForSecondaryOwnerAssignment = await _hddRepository.GetVinsForSecondaryOwnershipAssignment(ownerId, secondaryOwnerId);
             IList<VinSecondaryOwnerAction> vinSecondaryOwnerActions = new List<VinSecondaryOwnerAction>();
             foreach (var vin in VinsForSecondaryOwnerAssignment)
             {
@@ -138,9 +160,13 @@ namespace HDD.Web.Services
 
 
 
+
+
+
+
         //public async Task<IEnumerable<VinOwnership>> GetVinsAndSecondaryOwners(string ownerId)
         //{
-        //    var secondaryOwnersVins = await _dataService.GetSecondaryOwnerIds(ownerId);
+        //    var secondaryOwnersVins = await _hddRepository.GetSecondaryOwnerIds(ownerId);
 
         ////public string? OwnerId { get; set; }
         ////public string? Vin { get; set; }
