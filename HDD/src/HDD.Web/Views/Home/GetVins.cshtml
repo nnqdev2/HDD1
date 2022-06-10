@@ -1,0 +1,54 @@
+﻿@model IEnumerable<HDD.ApplicationCore.Entities.ApGetVinsByOwnerId>
+
+
+@{
+    ViewData["Title"] = "Manage VINs";
+
+}
+
+<div class="container p-3">
+	<div class="row pt-4">
+		<div class="col-6">
+			<h1 class="text-primary">Manage Vin Applications and Document Uploads</h1>
+			<h2 class="text-primary">VINs you've claimed</h2>
+		</div>
+		<div class="col-6 text-end">
+			<a asp-action="ClaimAVin" class="btn btn-primary">
+				<i class="bi bi-plus-square"></i> &nbsp;Claim a new VIN
+			</a>
+		</div>
+	</div>
+
+	<br /><br />
+
+	<table class="table table-bordered table-striped table-hover" style="width:100%">
+		<thead>
+			<tr>
+				@*<th>OwnerId</th>*@
+				<th>VIN</th>
+				<th>PrimaryOwner?</th>
+				<th>Certification Status</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach(var obj in Model)
+			{
+				<tr>
+					@*<td width="30%">@obj.OwnerId</td>*@
+					<td width="30%">@obj.Vin</td>
+					<td width="30%">@obj.Plate</td>
+					<td width="10%">@obj.PrimaryOwner</td>
+					<td width="30%">@obj.Description</td>
+					<td>
+						<div class="w-75 btn-group" role="group">
+						<a asp-action="Details" asp-route-id="@obj.Vin" class="btn btn-primary mx-2">
+							<i class="bi bi-pencil-square">Update</i>
+						</a>
+						</div>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+</div>

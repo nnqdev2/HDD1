@@ -5,7 +5,7 @@ namespace HDD.ApplicationCore.Entities
 {
     public partial class OwnersVin
     {
-        public int OwnersVinid { get; set; }
+        public int OwnersVinId { get; set; }
         public string OwnerId { get; set; } = null!;
         public string Vin { get; set; } = null!;
         public string? PrimaryOwner { get; set; }

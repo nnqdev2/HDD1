@@ -15,13 +15,22 @@ namespace HDD.Web.Interfaces
         Task InsertOwnersVin(OwnersVin ownersVin);
         Task<IList<SecondaryOwnerAssignment>> GetSecondaryOwnerAssignments(string incomingSecondaryOwnerEmail);
         Task AssignVinsToSecondaryOwner (ApplicationUser secondaryOwner);
+        IEnumerable<OwnersVin> GetVins(string ownerId);
+
+        Task<IEnumerable<ApGetVinsByOwnerId>> GetVinsByOwnerIdAsync(string ownerId);
+
+
+
+
+
+
         //Vehicle GetVehicle(string vin, string plate);
         //IEnumerable<EmailCode> GetEmailCode(int vehicleId, string email);
         //Task<EmailCode> GetEmailCode(string vin, string plate, string email);
         Task UpdateVehicle(ApplicationViewModel avm);
 
 
-        IEnumerable<OwnersVin> GetVins(string ownerId);
+        
         IEnumerable<OwnersVin> GetPrimaryOwnersVins(string ownerId);
         Task<IList<OwnersVin>> GetSecondaryOwnerIds(string ownerId);
         RetrofitApplicationDmvccddata GetRetrofitApplicationDmvccddata(string vin);

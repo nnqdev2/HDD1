@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using HDD.Web.ViewModels;
 using System.Data;
 using HDD.Infrastructure.Identity;
+using HDD.ApplicationCore.Entities.Aggregates;
 
 namespace HDD.Web.Services
 {
@@ -76,6 +77,28 @@ namespace HDD.Web.Services
             var exeSp = "execute dbo.apAssignVinsToSecondaryOwner  @EmailId, @UserId";
             var result = await _context.Database.ExecuteSqlRawAsync(exeSp, emailIdParam, userIdParam);
         }
+        public async Task<IEnumerable<ApGetVinsByOwnerId>> GetVinsByOwnerIdAsync(string ownerId)
+        {
+            var ownerIdParam = (new SqlParameter("@OwnerId", ownerId));
+            var exeSp = "execute dbo.apGetVinsByOwnerId  @OwnerId";
+            IEnumerable<ApGetVinsByOwnerId> results = await _context.ApGetVinsByOwnerId.FromSqlRaw(exeSp, ownerIdParam).ToListAsync();
+            return results;
+        }
+        public IEnumerable<OwnersVin> GetVins(string ownerId)
+        {
+            IEnumerable<OwnersVin> result = _context.OwnersVins.Where(a => a.OwnerId == ownerId && a.OwnerStatus == true);
+            return result;
+        }
+
+
+
+
+
+
+
+
+
+
         public async Task UpdateVehicle(ApplicationViewModel avm)
         {
             var vehicle = new RetrofitApplication();
@@ -101,11 +124,7 @@ namespace HDD.Web.Services
 
 
 
-        public  IEnumerable<OwnersVin> GetVins(string ownerId)
-        {
-            IEnumerable<OwnersVin> result = _context.OwnersVins.Where(a => a.OwnerId == ownerId && a.OwnerStatus == true);
-            return result;
-        }
+
         public IEnumerable<OwnersVin> GetPrimaryOwnersVins(string ownerId)
         {
             IEnumerable<OwnersVin> result = _context.OwnersVins.Where(a => a.OwnerId == ownerId && a.OwnerStatus == true && a.PrimaryOwner == "Y");

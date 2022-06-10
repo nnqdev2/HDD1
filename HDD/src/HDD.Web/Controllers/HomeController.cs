@@ -33,7 +33,7 @@ namespace HDD.Web.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
-            userId = _userManager.GetUserId(User); // get user Id
+             userId = _userManager.GetUserId(User); // get user Id
             user = await _userManager.GetUserAsync(User); // get user's all data
             if (user == null)
             {
@@ -68,6 +68,24 @@ namespace HDD.Web.Controllers
                 }
             }
             return View(vpevm);
+        }
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> GetVins()
+        {
+            userId = _userManager.GetUserId(User); // get user Id
+            //user = await _userManager.GetUserAsync(User); // get user's all data
+            //var result = _dataService.GetVins(userId);
+            //var x = await _vinOwnershipService.GetSecondaryOwners("aaf7efd0-ae13-48e9-9d72-83e713ef8100");
+            //return View("GetVins", result); 
+            var result = await _vinService.GetVinsByOwnerIdAsync(userId);
+            return View(result);
+        }
+        [Authorize]
+        [HttpGet]
+        public IActionResult ClaimAVin()
+        {
+            return View();
         }
         public IActionResult Privacy()
         {

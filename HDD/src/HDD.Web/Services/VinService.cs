@@ -41,6 +41,11 @@ namespace HDD.Web.Services
                 return true;
             return false;
         }
+
+        public async Task<IEnumerable<ApGetVinsByOwnerId>> GetVinsByOwnerIdAsync(string ownerId)
+        {
+            return await _hddRepository.GetVinsByOwnerIdAsync(ownerId);
+        }
         public async Task ClaimAVin(string ownerId, string vin, string primaryOwner)
         {
             var ownersVin = new OwnersVin();
@@ -76,6 +81,8 @@ namespace HDD.Web.Services
             }).ToList();
             return documentActions;
         }
+
+
 
 
 
