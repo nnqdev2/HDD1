@@ -22,10 +22,54 @@ namespace HDD.Web.Services
         }
         public async Task<bool> IsVinRegulated(string vin)
         {
+            var vinParam = (new SqlParameter("@Vin", vin));
+            var isVinRegulatedParam = new SqlParameter { ParameterName = "@IsVinRegulated", SqlDbType = SqlDbType.Bit, Direction = ParameterDirection.Output };
+            var exeSp = "execute dbo.apIsVinRegulated  @Vin, @IsVinRegulated OUTPUT";
+            var result = await _context.Database.ExecuteSqlRawAsync(exeSp, vinParam, isVinRegulatedParam);
+            bool isVinRegulated = false;
+            if (isVinRegulatedParam.Value == DBNull.Value)
+                isVinRegulated = false;
+            else
+                isVinRegulated = (bool) isVinRegulatedParam.Value;
+            return isVinRegulated;
+        }
+        public async Task<bool> IsPlateRegulated(string plate)
+        {
+            var plateParam = (new SqlParameter("@Plate", plate));
+            var isPlateRegulatedParam = new SqlParameter { ParameterName = "@IsPlateRegulated", SqlDbType = SqlDbType.Bit, Direction = ParameterDirection.Output };
+            var exeSp = "execute dbo.apIsPlateRegulated  @Plate, @IsPlateRegulated OUTPUT";
+            var result = await _context.Database.ExecuteSqlRawAsync(exeSp, plateParam, isPlateRegulatedParam);
+            bool isPlateRegulated = false;
+            if (isPlateRegulatedParam.Value == DBNull.Value)
+                isPlateRegulated = false;
+            else
+                isPlateRegulated = (bool)isPlateRegulatedParam.Value;
+            return isPlateRegulated;
+        }
+        public async Task AssignVinsToSecondaryOwner(ApplicationUser secondaryOwner)
+        {
+            var emailIdParam = (new SqlParameter("@EmailId", secondaryOwner.UserName));
+            var userIdParam = (new SqlParameter("@UserId", secondaryOwner.Id));
+            var exeSp = "execute dbo.apAssignVinsToSecondaryOwner  @EmailId, @UserId";
+            var result = await _context.Database.ExecuteSqlRawAsync(exeSp, emailIdParam, userIdParam);
+        }
+        public async Task<IEnumerable<ApGetVinsByOwnerId>> GetVinsByOwnerIdAsync(string ownerId)
+        {
+            var ownerIdParam = (new SqlParameter("@OwnerId", ownerId));
+            var exeSp = "execute dbo.apGetVinsByOwnerId  @OwnerId";
+            IEnumerable<ApGetVinsByOwnerId> results = await _context.ApGetVinsByOwnerId.FromSqlRaw(exeSp, ownerIdParam).ToListAsync();
+            return results;
+        }
+
+
+
+
+        public async Task<bool> IsVinRegulatedOrig(string vin)
+        {
             var efound = await _context.RetrofitCertifications.Where(a => a.Vin == vin && a.Vinstatus == "A").CountAsync();
             return efound > 0;
         }
-        public async Task<bool> IsPlateRegulated(string plate)
+        public async Task<bool> IsPlateRegulatedOrig(string plate)
         {
             var efound = await (from ra in _context.RetrofitCertifications
                                 join d in _context.Dmvccddata on ra.Vin equals d.Vin
@@ -70,20 +114,7 @@ namespace HDD.Web.Services
             return results;
         }
 
-        public async Task AssignVinsToSecondaryOwner(ApplicationUser secondaryOwner)
-        {
-            var emailIdParam = (new SqlParameter("@EmailId", secondaryOwner.UserName));
-            var userIdParam = (new SqlParameter("@UserId", secondaryOwner.Id));
-            var exeSp = "execute dbo.apAssignVinsToSecondaryOwner  @EmailId, @UserId";
-            var result = await _context.Database.ExecuteSqlRawAsync(exeSp, emailIdParam, userIdParam);
-        }
-        public async Task<IEnumerable<ApGetVinsByOwnerId>> GetVinsByOwnerIdAsync(string ownerId)
-        {
-            var ownerIdParam = (new SqlParameter("@OwnerId", ownerId));
-            var exeSp = "execute dbo.apGetVinsByOwnerId  @OwnerId";
-            IEnumerable<ApGetVinsByOwnerId> results = await _context.ApGetVinsByOwnerId.FromSqlRaw(exeSp, ownerIdParam).ToListAsync();
-            return results;
-        }
+
         public IEnumerable<OwnersVin> GetVins(string ownerId)
         {
             IEnumerable<OwnersVin> result = _context.OwnersVins.Where(a => a.OwnerId == ownerId && a.OwnerStatus == true);
