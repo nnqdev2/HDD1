@@ -145,19 +145,21 @@ namespace HDD.Web.Areas.Identity.Pages.Account
 
         public async Task<JsonResult> OnPostCheckEmail(string email)
         {
-            var result = await _vinOwnershipService.IsIncomingSecondaryOwner(email);
+            var result = await _vinOwnershipService.IsSecondaryOwnerEmailAsync(email);
             return new JsonResult(result);
         }
         public async Task<JsonResult> OnPostCheckVINPlateRegisteredZip(string vin, string plate, string registeredZip)
         {
             //string result = vin + plate + registeredZip;
             //return new JsonResult(result);
-            var result = await _vinOwnershipService.IsIncomingPrimaryOwner(Input.VIN, Input.Plate, Input.RegisteredZip);
-            if (result)
+            var apReturnCodeMessage = await _vinOwnershipService.ValidatePrimaryOwnerAtRegistrationAsync(Input.VIN, Input.Plate, Input.RegisteredZip);
+            var result = true;
+            if (apReturnCodeMessage.ReturnCode < 1)
             {
                 ModelState.AddModelError("Input.VIN", "Invalid VIN, Plate, Registered Zip combination");
                 ModelState.AddModelError("Input.Plate", "Invalid VIN, Plate, Registered Zip combination");
                 ModelState.AddModelError("Input.RegisteredZip", "Invalid VIN, Plate, Registered Zip combination");
+                result = false;
             }
             return new JsonResult(result);
         }
@@ -168,8 +170,8 @@ namespace HDD.Web.Areas.Identity.Pages.Account
 
             if (Input.VIN != null)
             {
-                var result = await _vinOwnershipService.IsIncomingPrimaryOwner(Input.VIN, Input.Plate, Input.RegisteredZip);
-                if (!result)
+                var apReturnCodeMessage = await _vinOwnershipService.ValidatePrimaryOwnerAtRegistrationAsync(Input.VIN, Input.Plate, Input.RegisteredZip);
+                if (apReturnCodeMessage.ReturnCode < 1)
                 {
                     ModelState.AddModelError("Input.VIN", "Invalid VIN, Plate, Registered Zip combination");
                     ModelState.AddModelError("Input.Plate", "Invalid VIN, Plate, Registered Zip combination");

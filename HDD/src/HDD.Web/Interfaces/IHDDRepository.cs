@@ -6,18 +6,22 @@ namespace HDD.Web.Interfaces
 {
     public interface IHDDRepository
     {
-        Task<bool> IsVinRegulated(string vin);
-        Task<bool> IsPlateRegulated(string plate);
+        Task<bool> IsVinRegulatedAsync(string vin);
+        Task<bool> IsPlateRegulatedAsync(string plate);
+        Task<IEnumerable<ApGetVinsByOwnerId>> GetVinsByOwnerIdAsync(string ownerId);
+        Task<ApIsVinClaimable> IsVinClaimableAsync(string vin, string userId);
+        Task<ApReturnCodeMessage> ValidatePrimaryOwnerAtRegistrationAsync(string vin, string plate, string zip);
+        Task<ApReturnCodeMessage> ValidateSecondaryOwnerAtRegistrationAsync(string email);
+        Task<ApReturnCodeMessage> AssignVinToPrimaryOwnerAsync(string vin, string userId);
         Task<bool> IsVinClaimed(string vin);
         Task<string> GetVin(string plate);
         Task<bool> IsIncomingPrimaryOwner(string vin, string plate, string registeredZip);
         Task<bool> IsIncomingSecondaryOwner(string email);
         Task InsertOwnersVin(OwnersVin ownersVin);
         Task<IList<SecondaryOwnerAssignment>> GetSecondaryOwnerAssignments(string incomingSecondaryOwnerEmail);
-        Task AssignVinsToSecondaryOwner (ApplicationUser secondaryOwner);
+        Task AssignVinsToSecondaryOwnerAsync (ApplicationUser secondaryOwner);
         IEnumerable<OwnersVin> GetVins(string ownerId);
 
-        Task<IEnumerable<ApGetVinsByOwnerId>> GetVinsByOwnerIdAsync(string ownerId);
 
 
 

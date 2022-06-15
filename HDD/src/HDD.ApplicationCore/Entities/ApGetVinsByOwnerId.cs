@@ -11,7 +11,8 @@ public class ApGetVinsByOwnerId
     public string OwnerId { get; set; } = null!;
     public string Vin { get; set; } = null!;
     public string Plate { get; set; } = null!;
-    public string? PrimaryOwner { get; set; }
+    public int? PrimaryOwnerVinId { get; set; }
+    public string PrimaryOwnerEmail { get; set; } = null!;
     public DateTime? UpdateDateTime { get; set; }
     public string CertifiedType { get; set; } = null!;
     public string? Description { get; set; }

@@ -20,11 +20,11 @@ namespace HDD.Web.Services
             _context = context;
             _logger = logger;
         }
-        public async Task<bool> IsVinRegulated(string vin)
+        public async Task<bool> IsVinRegulatedAsync(string vin)
         {
             var vinParam = (new SqlParameter("@Vin", vin));
-            var isVinRegulatedParam = new SqlParameter { ParameterName = "@IsVinRegulated", SqlDbType = SqlDbType.Bit, Direction = ParameterDirection.Output };
-            var exeSp = "execute dbo.apIsVinRegulated  @Vin, @IsVinRegulated OUTPUT";
+            var isVinRegulatedParam = new SqlParameter { ParameterName = "@IsVinRegulatedAsync", SqlDbType = SqlDbType.Bit, Direction = ParameterDirection.Output };
+            var exeSp = "execute dbo.apIsVinRegulated  @Vin, @IsVinRegulatedAsync OUTPUT";
             var result = await _context.Database.ExecuteSqlRawAsync(exeSp, vinParam, isVinRegulatedParam);
             bool isVinRegulated = false;
             if (isVinRegulatedParam.Value == DBNull.Value)
@@ -33,11 +33,11 @@ namespace HDD.Web.Services
                 isVinRegulated = (bool) isVinRegulatedParam.Value;
             return isVinRegulated;
         }
-        public async Task<bool> IsPlateRegulated(string plate)
+        public async Task<bool> IsPlateRegulatedAsync(string plate)
         {
             var plateParam = (new SqlParameter("@Plate", plate));
-            var isPlateRegulatedParam = new SqlParameter { ParameterName = "@IsPlateRegulated", SqlDbType = SqlDbType.Bit, Direction = ParameterDirection.Output };
-            var exeSp = "execute dbo.apIsPlateRegulated  @Plate, @IsPlateRegulated OUTPUT";
+            var isPlateRegulatedParam = new SqlParameter { ParameterName = "@IsPlateRegulatedAsync", SqlDbType = SqlDbType.Bit, Direction = ParameterDirection.Output };
+            var exeSp = "execute dbo.apIsPlateRegulated  @Plate, @IsPlateRegulatedAsync OUTPUT";
             var result = await _context.Database.ExecuteSqlRawAsync(exeSp, plateParam, isPlateRegulatedParam);
             bool isPlateRegulated = false;
             if (isPlateRegulatedParam.Value == DBNull.Value)
@@ -46,7 +46,7 @@ namespace HDD.Web.Services
                 isPlateRegulated = (bool)isPlateRegulatedParam.Value;
             return isPlateRegulated;
         }
-        public async Task AssignVinsToSecondaryOwner(ApplicationUser secondaryOwner)
+        public async Task AssignVinsToSecondaryOwnerAsync(ApplicationUser secondaryOwner)
         {
             var emailIdParam = (new SqlParameter("@EmailId", secondaryOwner.UserName));
             var userIdParam = (new SqlParameter("@UserId", secondaryOwner.Id));
@@ -60,10 +60,68 @@ namespace HDD.Web.Services
             IEnumerable<ApGetVinsByOwnerId> results = await _context.ApGetVinsByOwnerId.FromSqlRaw(exeSp, ownerIdParam).ToListAsync();
             return results;
         }
-
-
-
-
+        public async Task<ApIsVinClaimable> IsVinClaimableAsync(string vin, string userId)
+        {
+            var vinParam = (new SqlParameter("@Vin", vin));
+            var userIdParam = (new SqlParameter("@Userid", userId));
+            var isVinClaimableParam = new SqlParameter { ParameterName = "@IsVinClaimable", SqlDbType = SqlDbType.Bit, Direction = ParameterDirection.Output };
+            var returnCodeParam = new SqlParameter { ParameterName = "@ReturnCode", SqlDbType = SqlDbType.Int, Direction = ParameterDirection.Output };
+            var returnMessageParam = new SqlParameter { ParameterName = "@ReturnMessage", SqlDbType = SqlDbType.VarChar, Direction = ParameterDirection.Output };
+            var exeSp = "execute dbo.apIsVinClaimable @Vin, @Userid, @IsVinClaimable OUTPUT, @ReturnCode OUTPUT, @ReturnMessage OUTPUT";
+            var result = await _context.Database.ExecuteSqlRawAsync(exeSp, vinParam, userIdParam, isVinClaimableParam, returnCodeParam, returnMessageParam);
+            var apIsVinClaimable = new ApIsVinClaimable();
+            if (isVinClaimableParam.Value == DBNull.Value)
+                apIsVinClaimable.IsVinClaimable = false;
+            else
+                apIsVinClaimable.IsVinClaimable = (bool)isVinClaimableParam.Value;
+            apIsVinClaimable.ReturnCode = (int)returnCodeParam.Value;
+            apIsVinClaimable.ReturnMessage = (string)returnMessageParam.Value;
+            return apIsVinClaimable;
+        }
+        public async Task<ApReturnCodeMessage> ValidatePrimaryOwnerAtRegistrationAsync(string vin, string plate, string zip)
+        {
+            var vinParam = (new SqlParameter("@Vin", vin));
+            var plateParam = (new SqlParameter("@Plate", plate));
+            var zipParam = (new SqlParameter("@Zip", zip));
+            var returnCodeParam = new SqlParameter { ParameterName = "@ReturnCode", SqlDbType = SqlDbType.Int, Direction = ParameterDirection.Output };
+            var returnMessageParam = new SqlParameter { ParameterName = "@ReturnMessage", SqlDbType = SqlDbType.VarChar, Direction = ParameterDirection.Output };
+            var exeSp = "execute dbo.apValidatePrimaryOwnerAtRegistration @Vin, @Plate, @Zip,  @ReturnCode OUTPUT, @ReturnMessage OUTPUT";
+            var result = await _context.Database.ExecuteSqlRawAsync(exeSp, vinParam, plateParam, zipParam, returnCodeParam, returnMessageParam);
+            var apReturnCodeMessage = new ApReturnCodeMessage();
+            apReturnCodeMessage.ReturnCode = (int)returnCodeParam.Value;
+            apReturnCodeMessage.ReturnMessage = (string)returnMessageParam.Value;
+            return apReturnCodeMessage;
+        }
+        public async Task<ApReturnCodeMessage> ValidateSecondaryOwnerAtRegistrationAsync(string email)
+        {
+            var emailParam = (new SqlParameter("@Email", email));
+            var returnCodeParam = new SqlParameter { ParameterName = "@ReturnCode", SqlDbType = SqlDbType.Int, Direction = ParameterDirection.Output };
+            var returnMessageParam = new SqlParameter { ParameterName = "@ReturnMessage", SqlDbType = SqlDbType.VarChar, Direction = ParameterDirection.Output };
+            var exeSp = "execute dbo.apValidateSecondaryOwnerAtRegistration @Email,  @ReturnCode OUTPUT, @ReturnMessage OUTPUT";
+            var result = await _context.Database.ExecuteSqlRawAsync(exeSp, emailParam, returnCodeParam, returnMessageParam);
+            var apReturnCodeMessage = new ApReturnCodeMessage();
+            apReturnCodeMessage.ReturnCode = (int)returnCodeParam.Value;
+            apReturnCodeMessage.ReturnMessage = (string)returnMessageParam.Value;
+            return apReturnCodeMessage;
+        }
+        public async Task<ApReturnCodeMessage> AssignVinToPrimaryOwnerAsync(string vin, string userId)
+        {
+            var vinParam = (new SqlParameter("@Vin", vin));
+            var userIdParam = (new SqlParameter("@Userid", userId));
+            var returnCodeParam = new SqlParameter { ParameterName = "@ReturnCode", SqlDbType = SqlDbType.Int, Direction = ParameterDirection.Output };
+            var returnMessageParam = new SqlParameter { ParameterName = "@ReturnMessage", SqlDbType = SqlDbType.VarChar, Direction = ParameterDirection.Output };
+            var exeSp = "execute dbo.apIsVinClaimable @Vin, @Userid, @ReturnCode OUTPUT, @ReturnMessage OUTPUT";
+            var result = await _context.Database.ExecuteSqlRawAsync(exeSp, vinParam, userIdParam, returnCodeParam, returnMessageParam);
+            var apReturnCodeMessage = new ApReturnCodeMessage();
+            apReturnCodeMessage.ReturnCode = (int)returnCodeParam.Value;
+            apReturnCodeMessage.ReturnMessage = (string)returnMessageParam.Value;
+            return apReturnCodeMessage;
+        }
+        public async Task InsertOwnersVin(OwnersVin ownersVin)
+        {
+            await _context.AddAsync(ownersVin);
+            await _context.SaveChangesAsync();
+        }
         public async Task<bool> IsVinRegulatedOrig(string vin)
         {
             var efound = await _context.RetrofitCertifications.Where(a => a.Vin == vin && a.Vinstatus == "A").CountAsync();
@@ -103,7 +161,7 @@ namespace HDD.Web.Services
             return efound > 0;
         }
 
-        public async Task InsertOwnersVin(OwnersVin ownersVin)
+        public async Task InsertOwnersVinOrig(OwnersVin ownersVin)
         {
             await _context.AddAsync(ownersVin);
             await _context.SaveChangesAsync();
@@ -212,7 +270,7 @@ namespace HDD.Web.Services
 
         //public bool IsVinEligibleToClaim(string vin)
         //{
-        //    if (IsVinRegulated(vin) && !IsVinClaimed(vin))
+        //    if (IsVinRegulatedAsync(vin) && !IsVinClaimed(vin))
         //        return true;
         //    return false;
         //}

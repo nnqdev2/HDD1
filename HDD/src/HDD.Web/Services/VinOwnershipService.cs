@@ -47,26 +47,15 @@ namespace HDD.Web.Services
             await _hddRepository.InsertOwnersVin(ownersVin);
         }
 
-        public async Task AssignVinsToSecondaryOwner(ApplicationUser secondaryOwner)
+        public async Task AssignVinsToSecondaryOwnerAsync(ApplicationUser secondaryOwner)
         {
-            await _hddRepository.AssignVinsToSecondaryOwner(secondaryOwner);
+            await _hddRepository.AssignVinsToSecondaryOwnerAsync(secondaryOwner);
         }
 
-        public async Task AssignVinToPrimaryOwner(ApplicationUser primaryOwner)
+        public async Task<ApReturnCodeMessage>AssignVinToPrimaryOwnerAsync(ApplicationUser primaryOwner)
         {
-            // is vin still eligible to claim
-            var hasBeenClaimed = await _hddRepository.IsVinClaimed(primaryOwner.VIN);
-            if (!hasBeenClaimed)
-            {
-                var ownersVin = new OwnersVin();
-                ownersVin.OwnerId = primaryOwner.Id;
-                ownersVin.Vin = primaryOwner.VIN;
-                ownersVin.UpdateDateTime = DateTime.Now;
-                ownersVin.PrimaryOwner = "Y";
-                ownersVin.OwnerStatus = true;
-                ownersVin.UpdateDateTime = DateTime.Now;
-                await _hddRepository.InsertOwnersVin(ownersVin);
-            }
+            var apReturnCodeMessage = await _hddRepository.AssignVinToPrimaryOwnerAsync(primaryOwner.VIN, primaryOwner.Id);
+            return apReturnCodeMessage;
         }
         public void SendPermissionNotificationEmail(string requestEmail, string vin, bool isApproved)
         {
@@ -156,7 +145,17 @@ namespace HDD.Web.Services
             return vinSecondaryOwnerActions;
         }
 
+        public async Task<ApReturnCodeMessage> ValidatePrimaryOwnerAtRegistrationAsync(string vin, string plate, string zip)
+        {
+            var apReturnCodeMessage = await _hddRepository.ValidatePrimaryOwnerAtRegistrationAsync(vin, plate, zip);
+            return apReturnCodeMessage;
+        }
 
+        public async Task<bool> IsSecondaryOwnerEmailAsync(string email)
+        {
+            var apReturnCodeMessage = await _hddRepository.ValidateSecondaryOwnerAtRegistrationAsync(email);
+            return  (apReturnCodeMessage.ReturnCode > 0 ? true : false);
+        }
 
 
 

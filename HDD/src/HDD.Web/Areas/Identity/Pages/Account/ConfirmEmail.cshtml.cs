@@ -53,13 +53,13 @@ namespace HDD.Web.Areas.Identity.Pages.Account
             var result = await _userManager.ConfirmEmailAsync(user, code);
             if (result.Succeeded && !isConfirmedPreviously)
             {
-                if (!String.IsNullOrEmpty(user.VIN))
+                if (String.IsNullOrEmpty(user.VIN))
                 {
-                    await _vinOwnershipService.AssignVinToPrimaryOwner(user);
+                    await _vinOwnershipService.AssignVinsToSecondaryOwnerAsync(user);                    
                 }
                 else
                 {
-                    await _vinOwnershipService.AssignVinsToSecondaryOwner(user);
+                    await _vinOwnershipService.AssignVinToPrimaryOwnerAsync(user);
                 }
             }
 

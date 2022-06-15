@@ -23,11 +23,11 @@ namespace HDD.Web.Services
         }
         public async Task<bool> IsVinRegulated(string vin)
         {
-            return await _hddRepository.IsVinRegulated(vin);
+            return await _hddRepository.IsVinRegulatedAsync(vin);
         }
         public async Task<bool> IsPlateRegulated(string plate)
         {
-            return await _hddRepository.IsPlateRegulated(plate);
+            return await _hddRepository.IsPlateRegulatedAsync(plate);
         }
         public async Task<bool> IsPlateEligibleToClaim(string plate)
         {
@@ -37,7 +37,7 @@ namespace HDD.Web.Services
 
         public async Task<bool> IsVinEligibleToClaim(string vin)
         {
-            if (await _hddRepository.IsVinRegulated(vin) && !await _hddRepository.IsVinClaimed(vin))
+            if (await _hddRepository.IsVinRegulatedAsync(vin) && !await _hddRepository.IsVinClaimed(vin))
                 return true;
             return false;
         }
